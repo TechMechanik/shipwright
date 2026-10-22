@@ -20,14 +20,14 @@ Zips in git hide every change from review: an MR shows "binary file changed". Mo
 
 ## Artifacts
 
-- Tag pipeline builds the zip and uploads it to the Artifactory generic repo as `<repo>/<Package>/<version>/<Package>.zip`. That versioned zip is the only thing anyone installs.
+- Tag pipeline builds the zip and uploads it to the {{registry.name}} generic repo as `<repo>/<Package>/<version>/<Package>.zip`. That versioned zip is the only thing anyone installs.
 
 ## Deployment (manual today)
 
 Deployment stays manual, but it gets tracked:
 
-1. A person installs the Artifactory zip for the tag on the Integration Server, following `docs/deploy.md` (the runbook: which servers, install order across packages, post-install checks, how to roll back to the previous version).
-2. They then run the pipeline's manual **record-<env>** job for that tag. It does nothing but mark the deployment on a GitLab **environment**, so the Environments page shows which version is on dev, test and prod. Protected environments with approval make prod need a second person's sign-off.
+1. A person installs the {{registry.name}} zip for the tag on the Integration Server, following `docs/deploy.md` (the runbook: which servers, install order across packages, post-install checks, how to roll back to the previous version).
+2. They then run the pipeline's manual **record-<env>** job for that tag. It does nothing but mark the deployment on a platform **environment**, so the environments page shows which version is on dev, test and prod. Protected environments with approval make prod need a second person's sign-off.
 3. A package that depends on a DB change or a Java service release has its issue **blocked by** those, and the runbook names the order.
 
 Later, the same pipeline can call Deployer or the IS admin API instead of a person; the runbook and record jobs stay.

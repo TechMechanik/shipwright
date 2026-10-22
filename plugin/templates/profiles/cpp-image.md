@@ -9,11 +9,11 @@ Detect: `CMakeLists.txt` (adjust the commands below if the build is Make, Bazel 
 - Format: `clang-format --dry-run -Werror <changed files>`
 - Static analysis, if configured: `clang-tidy -p build <changed files>`
 - One test: `ctest --test-dir build -R <test name> --output-on-failure`
-- The image itself is built in CI; agents don't need Docker locally. If the build only works inside the builder image, run the checks there: `docker run --rm -v "$PWD":/src -w /src <registry>/<builder image> <command>`.
+- The image itself is built in CI; agents don't need Docker locally. If the build only works inside the builder image, run the checks there: `docker run --rm -v "$PWD":/src -w /src {{registry.docker}}/<builder image> <command>`.
 
 ## Artifacts
 
-- Tag pipeline builds the multi-stage image and pushes it to the Artifactory Docker registry as `<registry>/<name>:<version>`; container scanning runs on it.
+- Tag pipeline builds the multi-stage image and pushes it to the {{registry.name}} Docker registry as `{{registry.docker}}/<name>:<version>`; container scanning runs on it.
 
 ## Agent limits
 

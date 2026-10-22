@@ -1,9 +1,17 @@
 {
   "name": "team-process",
-  "version": "0.1.0",
-  "description": "Triage, milestone planning, board tidying, issue orchestration and release drafting on GitLab, with implementer/checks/chores subagents.",
+  "version": "0.2.0",
+  "description": "Agentic delivery process for GitLab or GitHub: team onboarding interview, repo onboarding (existing repos too), triage, milestones, board, orchestration, releases, cost-tiered subagents.",
   "author": {
     "name": "Eric Stoddard"
   },
-  "keywords": ["gitlab", "triage", "milestones", "orchestration", "process"]
+  "keywords": [
+    "gitlab",
+    "github",
+    "triage",
+    "milestones",
+    "onboarding",
+    "orchestration",
+    "process"
+  ]
 }

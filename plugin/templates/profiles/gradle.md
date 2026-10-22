@@ -4,7 +4,7 @@ Detect: `build.gradle` (use the wrapper, `./gradlew`).
 
 ## Checks
 
-- Setup: Gradle resolves through Artifactory, configured in `~/.gradle/gradle.properties` / `init.d`, never in the repo with credentials.
+- Setup: Gradle resolves through {{registry.name}}, configured in `~/.gradle/gradle.properties` / `init.d`, never in the repo with credentials.
 - Compile: `./gradlew assemble`
 - Lint/format, if configured: `<./gradlew spotlessCheck | checkstyleMain | none>`
 - One test class: `./gradlew test --tests '<fully.qualified.ClassTest>'`
@@ -13,7 +13,7 @@ Detect: `build.gradle` (use the wrapper, `./gradlew`).
 
 ## Artifacts
 
-- Tag pipeline runs `<the image task: jib | bootBuildImage | docker plugin task>` and pushes `<registry>/<service>:<version>` to the Artifactory Docker registry; container scanning runs on it.
+- Tag pipeline runs `<the image task: jib | bootBuildImage | docker plugin task>` and pushes `{{registry.docker}}/<service>:<version>` to the {{registry.name}} Docker registry; container scanning runs on it.
 - Shared code comes from the Maven library repos. A service change that needs a library change is **blocked by** that library's issue and bumps the version after the library releases.
 - A service change that needs a DB change is **blocked by** the DB repo's issue; the DB change deploys first.
 

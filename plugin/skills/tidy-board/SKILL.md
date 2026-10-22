@@ -1,6 +1,6 @@
 ---
 name: tidy-board
-description: Check the GitLab board and milestones for drift (missing milestones or status, stale in-progress items, mixed Next list, unweighted ready issues, finished milestones) and fix it. Use after merges, before planning, or when asked to tidy up.
+description: Check the board and milestones for drift (missing milestones or status, stale in-progress items, mixed Next list, unweighted ready issues, finished milestones) and fix it. Use after merges, before planning, or when asked to tidy up.
 ---
 
 # Tidy the board

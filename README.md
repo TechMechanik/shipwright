@@ -1,70 +1,59 @@
-# team-process: an agentic process kit for GitLab
+# team-process: an agentic delivery process for Claude Code
 
-The triage → milestone → board → work → release loop, packaged as a Claude Code plugin. It was extracted from a solo GitHub project and adapted for a team on GitLab with Artifactory.
+The triage → plan → build → review → release loop, packaged as a Claude Code plugin. It works on GitLab or GitHub (with a Jira stub), with any artifact registry and secrets source. A team answers an onboarding interview once; every repo, new or existing, is then onboarded from those answers.
+
+## How it fits together
+
+```
+Team's copy of this kit                         Each product repo
+───────────────────────                         ─────────────────
+/onboard-team  ─► plugin/config/team.yaml ─►  /onboard-repo ─► docs/agents/issue-tracker.md  (Operations for this platform)
+(interview, once)                                               docs/agents/repo-profile.md   (checks, artifacts, agent limits)
+                                                                docs/agents/triage-labels.md, domain.md
+                                                                CLAUDE.md rules, issue/MR templates, permissions
+                                                                existing labels, milestones and issues adopted
+```
+
+Agents and skills never hard-code a platform. They call named **operations** (`claim`, `set-status`, `open-mr`, `watch-ci`, `close-milestone` …), and each repo's `docs/agents/issue-tracker.md` maps those names to `glab` or `gh` commands. Generic skills such as [mattpocock-skills](https://github.com/mattpocock/skills) (`/triage`, `/to-spec`, `/to-tickets`, `/wayfinder`) read the same file.
 
 ## What's in it
 
 | Piece | What it does |
 | --- | --- |
-| `plugin/agents/implementer` (Sonnet) | Builds from a written plan; runs only the covering checks |
-| `plugin/agents/checks` (Haiku) | Runs checks or watches a pipeline; returns pass/fail + failing lines |
-| `plugin/agents/chores` (Haiku) | Labels, milestones, weights, board order, release-notes drafts |
-| `/process-setup` | Installs the templates into a repo and creates the labels |
-| `/triage-pass` | Batch-triages `needs-triage`; human approves the table before it's applied |
-| `/plan-milestone` | New phases (with renumbering) and filling a milestone with ordered tickets |
+| `/onboard-team` | Six-round interview (platform, planning, secrets and packages, delivery, agents, conventions) → `config/team.yaml`; sets agent models |
+| `/onboard-repo` | Installs docs, profile, templates and rules into a repo, filling tokens from the team config; adopts the existing backlog (label mapping, milestones, status for open issues) through approved tables |
+| `/triage-pass` | Batch-triages `needs-triage`; a human approves the table before it's applied |
+| `/plan-milestone` | New phases (with renumbering) and filling a phase with ordered, linked tickets |
 | `/tidy-board` | Drift check: missing milestone/status, stale in-progress, finished milestones |
-| `/work-issue` | One issue end to end: claim → plan → implement → verify → MR → handoff |
-| `/close-milestone` | Closes a finished milestone and drafts CHANGELOG notes; a human releases |
-| `plugin/templates/` | `docs/agents/*` (the tracker contract), issue/MR templates, CLAUDE.md rules, permissions |
-| `plugin/templates/profiles/` | One per repo type: Angular, Gradle, Maven, C++ image, DB (Liquibase), webMethods. Installed as `docs/agents/repo-profile.md`: checks, artifacts, agent limits |
-| `plugin/templates/db/` | Liquibase changelog skeleton and a GitLab CI template (MR rollback test, SQL preview, dev → test → approved prod) |
-| `plugin/templates/webmethods/` | CI template: package checks, zip → Artifactory on tags, manual record jobs so GitLab tracks what's deployed where |
+| `/work-issue` | One issue end to end: claim → plan → implement → verify → MR/PR → handoff |
+| `/close-milestone` | Closes a finished phase and drafts release notes; a human publishes |
+| `implementer` (Sonnet), `checks` (Haiku), `chores` (Haiku) | Cost-tiered subagents: build from a plan; run checks or watch CI; tracker bookkeeping |
+| `templates/tracker/` | GitLab, GitHub and Jira (stub) tracker docs with the Operations table |
+| `templates/profiles/` | Angular, Gradle microservice, Maven, C++ image, DB (Liquibase), webMethods |
+| `templates/db/`, `templates/webmethods/` | GitLab CI templates: Liquibase (Oracle/Postgres, rollback-tested, approved prod) and webMethods (checks, publish, recorded manual deploys) |
+| `config/team.example.yaml`, `templates/TOKENS.md` | The config schema and how its values fill the templates |
 
-The design idea: **skills and agents hold the process; each repo's `docs/agents/` holds the repo's specifics.** Generic skills (including [mattpocock-skills](https://github.com/mattpocock/skills) `/triage`, `/to-spec`, `/to-tickets`, `/wayfinder`) read `docs/agents/issue-tracker.md` to learn how to talk to the tracker, so the same skills work in every repo.
+## Adopting it
 
-## Install
-
-1. Push this directory to a GitLab repo, such as `tools/claude-team-process`.
-2. Each developer: `/plugin marketplace add https://<gitlab-host>/tools/claude-team-process.git`, then `/plugin install team-process@team-process`. Also install `mattpocock-skills` from the official marketplace.
-3. Or roll it out per repo by committing this to the repo's `.claude/settings.json`, so everyone who trusts the repo gets prompted to install it:
+1. **Copy the kit** into a repo your team owns (fork or import), such as `tools/claude-team-process`.
+2. **Onboard the team**: in that repo, run `/onboard-team` and commit the resulting `plugin/config/team.yaml`.
+3. **Install** for each developer: `/plugin marketplace add <url of your copy>` and `/plugin install team-process@team-process`, plus `mattpocock-skills` from the official marketplace. Or commit this to each product repo's `.claude/settings.json` so trusting the repo prompts the install:
 
    ```json
    {
      "extraKnownMarketplaces": {
-       "team-process": { "source": { "source": "git", "url": "https://<gitlab-host>/tools/claude-team-process.git" } }
+       "team-process": { "source": { "source": "git", "url": "<url of your copy>.git" } }
      },
      "enabledPlugins": { "team-process@team-process": true }
    }
    ```
-4. In each repo: run `/process-setup`. The first repo in a group also creates the group labels; a human then creates the **group** board (lists = the four `status::` labels). Milestones are group milestones, so one phase covers the DB, Java, Angular and webMethods repos of a product.
+4. **Onboard repos**: run `/onboard-repo` in each. Existing repos are the normal case: it never overwrites files or deletes labels, maps what's there, and opens one MR plus follow-up issues for bigger conversions (Liquibase adoption, unzipping webMethods packages, deploy runbooks).
+5. **Run the loop**: `/triage-pass`, `/plan-milestone`, `/work-issue`, `/tidy-board`, `/close-milestone`.
 
-Prerequisites: `glab` authenticated against your instance (`glab auth login --hostname <gitlab-host>`), and package managers already pointed at Artifactory in the user config (`~/.npmrc`, `~/.m2/settings.xml`, `pip.conf`) so agents never need registry tokens.
+Prerequisites: `glab` or `gh` logged in to your instance, and package managers pointed at your registry in user-level config, so agents never handle registry tokens.
 
-## The loop
+## Limits
 
-```
-idea ──shape (/grilling, /to-spec)──▶ tickets (/to-tickets, /plan-milestone)
-needs-triage ──/triage-pass──▶ ready-for-agent | ready-for-human | needs-info | wontfix
-milestone M0n ──▶ status::next (ordered) ──/work-issue──▶ in-progress ──MR──▶ in-review ──merge──▶ closed
-all closed ──/close-milestone──▶ CHANGELOG MR ──human──▶ glab release create ──CI──▶ Artifactory
-                     /tidy-board after merges and before planning
-```
-
-## Mapping from the original (GitHub) setup
-
-| GitHub original | GitLab here | Why |
-| --- | --- | --- |
-| Project board Status field | `status::*` scoped labels → board lists | GitLab boards are label-driven; scoped labels keep exactly one |
-| Size field (XS–XL) | Issue weight 1/2/3/5/8 | Native, sums per milestone |
-| Sub-issues, native dependencies | Group epics (`/epic &n`); `/blocked_by` links, also across repos | Cross-repo work is common here |
-| Draft release from a milestone-close workflow | Draft CHANGELOG MR; human runs `glab release create --milestone` | GitLab has no draft releases or milestone-close CI trigger |
-| Release categories from PR labels | Same labels on MRs, grouped by `/close-milestone` | Same notes, without a workflow |
-| GHCR image | Artifactory, published by the tag pipeline only | Agents never publish |
-| Cloudflare approval rule | Infra/CI-variable/Artifactory approval rule | Same "propose + rollback, then wait" gate |
-| Solo "owner merges" | Assignee claims + MR approval rules | Several people and agents share the board |
-
-## Things to decide for your team
-
-- **Who may set `ready-for-agent`**: usually a lead or the person who triages. That label is the gate that lets an agent run AFK.
-- **Model tiers**: Sonnet for implementer and Haiku for checks/chores suit a cost-conscious setup. On an enterprise plan you may want the implementer on a larger model; change the `model:` line in its frontmatter.
-- **The "one issue per conversation" rule** began as a cost measure; it's also the best defence against context drift, so keep it either way.
+- The CI templates are GitLab CI. On GitHub, `/onboard-repo` opens an issue to port them to Actions.
+- Jira gets a stub tracker doc with the operation names to fill in.
+- Agents never merge, release, publish or deploy, whatever the autonomy setting.

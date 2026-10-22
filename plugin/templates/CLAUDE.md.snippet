@@ -2,37 +2,44 @@
 
 ### Issue tracker
 
-Issues live in GitLab and are worked with `glab`. See `docs/agents/issue-tracker.md` (conventions, board, milestones, releases).
+Issues live in {{tracker.name}}; code and CI on {{platform.host}} ({{platform.url}}). Every tracker and CI action has one command, listed by name in the **Operations** table of `docs/agents/issue-tracker.md`, which also covers the board, phases and releases.
 
 ### Triage labels
 
-`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`, plus `idea`. See `docs/agents/triage-labels.md`.
+`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`, plus `idea`. See `docs/agents/triage-labels.md`. Only {{tracker.ready_for_agent_by}} apply `ready-for-agent`.
 
 ### Domain docs
 
-`CONTEXT.md` (glossary) and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+{{docs.contexts_line}} See `docs/agents/domain.md`.
 
 ### Repo profile
 
-How to check, build and publish this repo, and what agents must not do here: `docs/agents/repo-profile.md`. Its **Checks** section is what the implementer and checks agents run. Full suites run in GitLab CI on every MR; locally, run only the checks and tests that cover the change.
+How to check, build and publish this repo, and what agents must not do here: `docs/agents/repo-profile.md`. Its **Checks** section is what the implementer and checks agents run. Full suites run in CI on every MR/PR; locally, run only the checks and tests that cover the change.
 
+### Conventions
+
+- Branches: `{{conventions.branch}}`. Commits: {{conventions.commits_line}}.
+- Agents may {{agents.autonomy_line}}. Agents never merge, release, publish or deploy.
+
+<!-- economy:start (left out when agents.economy is false) -->
 ## Working economically
 
-- **One issue per conversation.** When an issue's MR is open or a milestone is closed, stop and give a two- or three-line handoff so the session can be cleared.
+- **One issue per conversation.** When an issue's MR/PR is open or a milestone is closed, stop and give a two- or three-line handoff so the session can be cleared.
 - **Delegate routine work to cheaper agents** (`team-process` plugin):
-  - `implementer` (Sonnet) for clearly specified code changes. The main conversation shapes the change and writes the plan.
-  - `checks` (Haiku) to run checks or watch an MR's pipeline once, instead of polling.
-  - `chores` (Haiku) for board, label, milestone and release-notes bookkeeping.
+  - `implementer` ({{agents.models.implementer}}) for clearly specified code changes. The main conversation shapes the change and writes the plan.
+  - `checks` ({{agents.models.checks}}) to run checks or watch a pipeline once, instead of polling.
+  - `chores` ({{agents.models.chores}}) for board, label, milestone and release-notes bookkeeping.
 
   Do tiny edits inline: a spawned agent starts cold, so it only pays off for real work or noisy output.
 - Read only the parts of files you need; grep before reading. Filter command output to the lines that matter. Keep replies short. Follow narrow asks literally.
+<!-- economy:end -->
 
 ## Hard rules
 
 - Gate every verify-then-commit step on **exit codes**, never on `| tail` output (a piped tail exits 0 and hides failures). State test counts only from the branch actually tested.
 - After a routine merge, confirm it landed on the default branch and stop; don't poll deploy pipelines unless the change touches data, migrations or deploy scripts, or you're asked.
-- Never close a milestone just to tidy up; it starts a release. Never create a release, push a tag or publish to Artifactory unless a human asked.
+- Never close a milestone just to tidy up; it starts a release. Never publish a release, push a tag or publish to {{registry.name}} unless a human asked.
 - Never build from an `idea`; shape it into `ready-*` tickets first.
-- **Changes to infrastructure, CI/CD variables, protected branches, Artifactory repositories or permissions need explicit human approval first.** Propose the change and how to roll it back, then wait. Read-only lookups are fine.
-- Never commit tokens, `.npmrc`/`settings.xml`/`gradle.properties` credentials or Artifactory API keys. Secrets come from `<vault / CI variables>`.
-- Never run anything against a shared database or Integration Server; agents use throwaway local or CI instances only. Deploys happen only in pipelines, started by a human's merge or a human-run manual job.
+- **These changes need explicit human approval first: {{approvals_line}}.** Propose the change and how to roll it back, then wait. Read-only lookups are fine.
+- Never commit tokens, package-manager credentials (`.npmrc`, `settings.xml`, `gradle.properties`) or {{registry.name}} keys. Pipelines get secrets from {{secrets.ci_line}}; developers get them locally through {{secrets.local}}.
+- Never run anything against a shared environment (databases, integration servers, clusters); agents use throwaway local or CI instances only. Deploys happen only through {{deploy.model_line}}.

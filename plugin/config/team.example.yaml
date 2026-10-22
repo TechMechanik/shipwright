@@ -1,0 +1,81 @@
+# Team process configuration.
+# Written by /onboard-team and committed to the team's copy of this kit, so every developer
+# who installs the plugin gets the same answers. Re-run /onboard-team to change it.
+# /onboard-repo reads this file and fills the {{...}} tokens in the templates.
+version: 1
+
+team:
+  name: Acme Integration                 # used in docs and release notes
+
+platform:
+  host: gitlab                           # gitlab | github
+  url: https://gitlab.example.com        # instance URL (https://github.com for GitHub)
+  tier: ultimate                         # gitlab: free | premium | ultimate; github: free | team | enterprise
+  scope: group                           # group: board, milestones, labels shared by a group/org; repo: per repo
+  owner: acme/integration                # GitLab group path, or GitHub org/user
+
+tracker:
+  system: platform                       # platform (GitLab/GitHub issues) | jira (stub only, see onboard-repo)
+  board:
+    name: Integration roadmap
+    url: https://gitlab.example.com/groups/acme/integration/-/boards/1
+    status: labels                       # labels (status::* scoped labels) | project-field (GitHub Projects Status)
+  size: weight                           # weight | project-field | labels
+  phases:
+    style: milestones                    # milestones (goal-based phases) | iterations (time-boxed sprints)
+    code: M                              # prefix for zero-padded phase codes: M01, M02 …
+  epics: true                            # group epics for cross-repo work (GitLab Premium+) / sub-issues (GitHub)
+  ready_for_agent_by: leads              # leads | triager  (who may apply ready-for-agent)
+  mrs_as_requests: false                 # treat outside contributors' MRs/PRs as requests in triage
+
+secrets:
+  ci: vault                              # platform-variables | vault | cloud
+  vault:                                 # only when ci: vault
+    url: https://vault.example.com
+    auth: jwt                            # GitLab id_tokens / GitHub OIDC
+    path_prefix: secret/data/integration
+  local: "vault CLI (vault login -method=oidc)"   # how developers fetch secrets on their machines
+
+registry:
+  name: Artifactory                      # Artifactory | Nexus | GitLab Package Registry | GitHub Packages | none
+  url: https://artifactory.example.com/artifactory
+  docker: artifactory.example.com/docker-local
+  kinds: [docker, maven, npm, generic]
+  dev_config: user-level                 # package managers point at it from user config (~/.npmrc, ~/.m2/settings.xml)
+
+releases:
+  cadence: milestone                     # milestone (one minor per finished phase) | continuous | manual
+  notes: changelog-mr                    # changelog-mr | draft-release (GitHub only; GitLab has no drafts)
+  published_by: human                    # human (always, in this kit)
+
+deploy:
+  model: pipelines                       # pipelines | manual | external-cd
+  environments: [dev, test, prod]
+  prod_approval: true                    # protected environment / required reviewers on prod
+
+approvals:                               # agents propose these (with rollback) and wait for a human
+  - infrastructure
+  - ci-cd-variables
+  - protected-branches
+  - registry
+  - dns-network
+  - access-and-permissions
+
+agents:
+  autonomy: open-mr                      # local-only | push-branch | open-mr  (agents never merge)
+  plan: enterprise                       # pro | max | team | enterprise | api  (drives the economy rules)
+  economy: true                          # one issue per conversation, delegate to cheaper agents, lean reads
+  models:
+    implementer: sonnet
+    checks: haiku
+    chores: haiku
+
+conventions:
+  branch: "{slug}-{issue}"               # tokens: {slug} {issue} {type}
+  commits: conventional                  # conventional | free
+  issue_ref: "#"                         # "#" for platform issues, or a Jira key prefix like "INT-"
+
+docs:
+  contexts: single                       # single (one CONTEXT.md) | multi (CONTEXT-MAP.md + one per context)
+
+repo_types: [angular, gradle, maven, cpp-image, db-liquibase, webmethods]

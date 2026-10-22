@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh project item-list:*)",
+      "Bash(gh project field-list:*)"
+    ],
+    "ask": [
+      "Bash(gh release:*)",
+      "Bash(git push --tags:*)",
+      "Bash(git tag:*)",
+      "Bash(gh secret:*)",
+      "Bash(gh variable:*)"
+    ]
+  }
+}
