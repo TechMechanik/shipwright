@@ -1,0 +1,9 @@
+{
+  "name": "team-process",
+  "version": "0.1.0",
+  "description": "Triage, milestone planning, board tidying, issue orchestration and release drafting on GitLab, with implementer/checks/chores subagents.",
+  "author": {
+    "name": "Eric Stoddard"
+  },
+  "keywords": ["gitlab", "triage", "milestones", "orchestration", "process"]
+}

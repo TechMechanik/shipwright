@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "team-process",
+  "metadata": {
+    "description": "Our team's agentic process for GitLab: triage, milestones, board, orchestration and cost-tiered subagents."
+  },
+  "owner": {
+    "name": "Eric Stoddard"
+  },
+  "plugins": [
+    {
+      "name": "team-process",
+      "description": "Triage, milestone planning, board tidying, issue orchestration and release drafting on GitLab, with implementer/checks/chores subagents.",
+      "version": "0.1.0",
+      "source": "./plugin",
+      "category": "development"
+    }
+  ]
+}

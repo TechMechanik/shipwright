@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(glab issue view:*)",
+      "Bash(glab issue list:*)",
+      "Bash(glab mr view:*)",
+      "Bash(glab mr list:*)",
+      "Bash(glab mr diff:*)",
+      "Bash(glab ci status:*)",
+      "Bash(glab ci get:*)",
+      "Bash(glab ci trace:*)"
+    ],
+    "ask": [
+      "Bash(glab release:*)",
+      "Bash(git push --tags:*)",
+      "Bash(git tag:*)",
+      "Bash(jf:*)",
+      "Bash(jfrog:*)"
+    ]
+  }
+}

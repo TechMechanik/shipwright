@@ -1,0 +1,67 @@
+# webMethods package pipeline: build and publish the zip; record manual deployments.
+# Put it in the group's ci-templates project and include it.
+#
+# Project variables:
+#   WM_PACKAGES        space-separated package names, e.g. "AcmeOrders AcmeCommon"
+#   WM_SOURCE          "unzipped" (package folders in git; CI zips them) or "zip" (zips in git)
+#   ARTIFACTORY_URL    e.g. https://artifactory.example.com/artifactory
+#   ARTIFACTORY_REPO   generic repo for packages, e.g. wm-packages-local
+#   ARTIFACTORY_TOKEN  masked, protected; publish rights on that repo only
+# Make test and prod protected environments; prod needs approval.
+
+stages: [check, publish, record]
+
+check:
+  stage: check
+  image: $CI_TOOLS_IMAGE   # any small image with bash, zip, unzip, grep (from Artifactory)
+  script:
+    - |
+      set -euo pipefail
+      for p in $WM_PACKAGES; do
+        if [ "$WM_SOURCE" = "zip" ]; then mkdir -p "/tmp/wm/$p" && unzip -q -o "$p.zip" -d "/tmp/wm/$p"; dir="/tmp/wm/$p"; else dir="$p"; fi
+        test -f "$dir/manifest.v3" || { echo "$p: no manifest.v3 at package root"; exit 1; }
+        if grep -rniE "password=|jdbc:|https?://[a-z0-9.-]+:[0-9]+" "$dir/ns" "$dir/config" 2>/dev/null; then
+          echo "$p: environment-specific values found above; move them to substitution/global variables"; exit 1
+        fi
+      done
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_TAG
+
+publish:
+  stage: publish
+  image: $CI_TOOLS_IMAGE   # needs curl and zip
+  script:
+    - |
+      set -euo pipefail
+      for p in $WM_PACKAGES; do
+        if [ "$WM_SOURCE" = "unzipped" ]; then (cd "$p" && zip -qr "../$p.zip" .); fi
+        curl -fsS -H "Authorization: Bearer $ARTIFACTORY_TOKEN" -T "$p.zip" \
+          "$ARTIFACTORY_URL/$ARTIFACTORY_REPO/$p/$CI_COMMIT_TAG/$p.zip"
+        echo "published $p $CI_COMMIT_TAG"
+      done
+  rules:
+    - if: $CI_COMMIT_TAG
+
+# Run after installing the tag's zips by hand (see docs/deploy.md). Records nothing on the server;
+# it only marks the deployment so GitLab's Environments page shows what runs where.
+.record:
+  stage: record
+  image: $CI_TOOLS_IMAGE
+  script:
+    - echo "Recorded $WM_PACKAGES $CI_COMMIT_TAG on $CI_ENVIRONMENT_NAME by $GITLAB_USER_LOGIN"
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+
+record-dev:
+  extends: .record
+  environment: { name: dev }
+
+record-test:
+  extends: .record
+  environment: { name: test }
+
+record-prod:
+  extends: .record
+  environment: { name: prod }

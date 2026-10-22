@@ -1,0 +1,125 @@
+# Liquibase pipeline. Put this in a shared ci-templates project and include it:
+#   include:
+#     - project: <group>/ci-templates
+#       file: liquibase.gitlab-ci.yml
+#
+# Needs, per environment scope:
+#   LIQUIBASE_COMMAND_URL, LIQUIBASE_COMMAND_USERNAME, LIQUIBASE_COMMAND_PASSWORD
+#   - scoped to dev / test / prod: deploy accounts, masked and protected
+#   - scoped to preview/*: READ-ONLY accounts, masked, not protected (MR pipelines see them)
+# And project variables:
+#   DB_ENGINE        postgres | oracle   (one engine per repo)
+#   LIQUIBASE_IMAGE  liquibase/liquibase via the Artifactory Docker remote. Check its lib/ for
+#                    the Oracle driver; if it's missing, bake ojdbc11 into a small image of your own.
+#   POSTGRES_IMAGE   e.g. <artifactory>/postgres:16        (match prod's major version)
+#   ORACLE_IMAGE     e.g. <artifactory>/gvenzl/oracle-free:23-slim  (Oracle Database Free; slow to start)
+
+stages: [test, deploy]
+
+variables:
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/db.changelog-master.yaml
+
+.liquibase:
+  image:
+    name: $LIQUIBASE_IMAGE
+    entrypoint: [""]
+
+# Apply every changeset, roll each back, apply again, against a throwaway database.
+.apply-and-rollback:
+  extends: .liquibase
+  stage: test
+  script:
+    - liquibase validate
+    - liquibase update-testing-rollback
+
+apply-and-rollback-postgres:
+  extends: .apply-and-rollback
+  services:
+    - name: $POSTGRES_IMAGE
+      alias: testdb
+  variables:
+    POSTGRES_DB: app
+    POSTGRES_USER: app
+    POSTGRES_PASSWORD: throwaway
+    LIQUIBASE_COMMAND_URL: jdbc:postgresql://testdb:5432/app
+    LIQUIBASE_COMMAND_USERNAME: app
+    LIQUIBASE_COMMAND_PASSWORD: throwaway
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $DB_ENGINE == "postgres"
+
+apply-and-rollback-oracle:
+  extends: .apply-and-rollback
+  services:
+    - name: $ORACLE_IMAGE
+      alias: testdb
+  variables:
+    ORACLE_PASSWORD: throwaway
+    APP_USER: app
+    APP_USER_PASSWORD: throwaway
+    LIQUIBASE_COMMAND_URL: jdbc:oracle:thin:@//testdb:1521/FREEPDB1
+    LIQUIBASE_COMMAND_USERNAME: app
+    LIQUIBASE_COMMAND_PASSWORD: throwaway
+  before_script:
+    # The Oracle container takes a minute or two to open the PDB; wait for it.
+    - for i in $(seq 1 60); do liquibase status >/dev/null 2>&1 && break; sleep 5; done
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $DB_ENGINE == "oracle"
+
+preview:
+  extends: .liquibase
+  stage: test
+  # Read-only credentials (preview/* scope), so the DBA sees the exact SQL each environment would get.
+  environment: { name: preview/$TARGET, action: prepare }
+  parallel:
+    matrix:
+      - TARGET: [dev, test, prod]
+  script:
+    - liquibase update-sql > update-$TARGET.sql
+  artifacts:
+    paths: [update-*.sql]
+    expire_in: 2 weeks
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+.deploy:
+  extends: .liquibase
+  stage: deploy
+  resource_group: db-$CI_ENVIRONMENT_NAME   # never two deploys to one database at once
+  script:
+    - liquibase tag --tag="pipeline-$CI_PIPELINE_ID"
+    - liquibase update
+
+deploy-dev:
+  extends: .deploy
+  environment: { name: dev }
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-test:
+  extends: .deploy
+  environment: { name: test }
+  needs: [deploy-dev]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+
+deploy-prod:
+  extends: .deploy
+  # Make "prod" a protected environment with required approvals from the DBA group.
+  environment: { name: prod }
+  needs: [deploy-test]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+
+rollback:
+  extends: .liquibase
+  stage: deploy
+  environment: { name: $TARGET }
+  resource_group: db-$TARGET
+  script:
+    - test -n "$ROLLBACK_TAG"
+    - liquibase rollback --tag="$ROLLBACK_TAG"
+  rules:
+    # Run from "Run pipeline" with TARGET and ROLLBACK_TAG set.
+    - if: $CI_PIPELINE_SOURCE == "web" && $ROLLBACK_TAG
