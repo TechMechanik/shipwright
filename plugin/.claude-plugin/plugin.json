@@ -1,7 +1,7 @@
 {
-  "name": "team-process",
+  "name": "shipwright",
   "version": "0.3.0",
-  "description": "Agentic delivery process for GitLab or GitHub: team onboarding interview, repo onboarding (existing repos too), triage, milestones, board, orchestration, releases, cost-tiered subagents.",
+  "description": "Team delivery process for Claude Code: triage, plan, build, review and release, on GitLab or GitHub.",
   "author": {
     "name": "Eric Stoddard"
   },

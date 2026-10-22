@@ -25,7 +25,7 @@ How to check, build and publish this repo, and what agents must not do here: `do
 ## Working economically
 
 - **One issue per conversation.** When an issue's MR/PR is open or a milestone is closed, stop and give a two- or three-line handoff so the session can be cleared.
-- **Delegate routine work to cheaper agents** (`team-process` plugin):
+- **Delegate routine work to cheaper agents** (`shipwright` plugin):
   - `implementer` ({{agents.models.implementer}}) for clearly specified code changes. The main conversation shapes the change and writes the plan.
   - `checks` ({{agents.models.checks}}) to run checks or watch a pipeline once, instead of polling.
   - `chores` ({{agents.models.chores}}) for board, label, milestone and release-notes bookkeeping.

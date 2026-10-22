@@ -1,4 +1,4 @@
-# Team process configuration.
+# Shipwright team configuration.
 # Written by /onboard-team and committed to the team's copy of this kit, so every developer
 # who installs the plugin gets the same answers. Re-run /onboard-team to change it.
 # /onboard-repo reads this file and fills the {{...}} tokens in the templates.

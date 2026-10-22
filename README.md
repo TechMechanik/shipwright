@@ -1,6 +1,8 @@
-# team-process: an agentic delivery process for Claude Code
+# Shipwright
 
-The triage → plan → build → review → release loop, packaged as a Claude Code plugin. It works on GitLab or GitHub (with a Jira stub), with any artifact registry and secrets source. A team answers an onboarding interview once; every repo, new or existing, is then onboarded from those answers.
+A Claude Code plugin that runs a team's delivery process with people and AI agents working side by side: onboarding interview, triage, shaping, ticket splitting, milestone planning, issue orchestration and release drafting. Works on GitLab or GitHub, with profiles for each repo type and approval gates on anything risky.
+
+It works with any artifact registry and secrets source, and has a Jira stub. A team answers an onboarding interview once; every repo, new or existing, is then onboarded from those answers.
 
 ## How it fits together
 
@@ -38,16 +40,16 @@ Agents and skills never hard-code a platform. They call named **operations** (`c
 
 ## Adopting it
 
-1. **Copy the kit** into a repo your team owns (fork or import), such as `tools/claude-team-process`.
+1. **Copy the kit** into a repo your team owns (fork or import), such as `tools/shipwright`.
 2. **Onboard the team**: in that repo, run `/onboard-team` and commit the resulting `plugin/config/team.yaml`.
-3. **Install** for each developer: `/plugin marketplace add <url of your copy>` and `/plugin install team-process@team-process`. Or commit this to each product repo's `.claude/settings.json` so trusting the repo prompts the install:
+3. **Install** for each developer: `/plugin marketplace add <url of your copy>` and `/plugin install shipwright@shipwright`. Or commit this to each product repo's `.claude/settings.json` so trusting the repo prompts the install:
 
    ```json
    {
      "extraKnownMarketplaces": {
-       "team-process": { "source": { "source": "git", "url": "<url of your copy>.git" } }
+       "shipwright": { "source": { "source": "git", "url": "<url of your copy>.git" } }
      },
-     "enabledPlugins": { "team-process@team-process": true }
+     "enabledPlugins": { "shipwright@shipwright": true }
    }
    ```
 4. **Onboard repos**: run `/onboard-repo` in each. Existing repos are the normal case: it never overwrites files or deletes labels, maps what's there, and opens one MR plus follow-up issues for bigger conversions (Liquibase adoption, unzipping webMethods packages, deploy runbooks).

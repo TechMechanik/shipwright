@@ -1,16 +1,16 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "team-process",
+  "name": "shipwright",
   "metadata": {
-    "description": "Agentic delivery process for GitLab or GitHub: team onboarding interview, repo onboarding (existing repos too), triage, milestones, board, orchestration, releases, cost-tiered subagents."
+    "description": "Team delivery process for Claude Code: triage, plan, build, review and release, on GitLab or GitHub."
   },
   "owner": {
     "name": "Eric Stoddard"
   },
   "plugins": [
     {
-      "name": "team-process",
-      "description": "Agentic delivery process for GitLab or GitHub: team onboarding interview, repo onboarding (existing repos too), triage, milestones, board, orchestration, releases, cost-tiered subagents.",
+      "name": "shipwright",
+      "description": "Team delivery process for Claude Code: triage, plan, build, review and release, on GitLab or GitHub.",
       "version": "0.3.0",
       "source": "./plugin",
       "category": "development"
