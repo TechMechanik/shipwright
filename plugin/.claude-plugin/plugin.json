@@ -1,6 +1,6 @@
 {
   "name": "team-process",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Agentic delivery process for GitLab or GitHub: team onboarding interview, repo onboarding (existing repos too), triage, milestones, board, orchestration, releases, cost-tiered subagents.",
   "author": {
     "name": "Eric Stoddard"

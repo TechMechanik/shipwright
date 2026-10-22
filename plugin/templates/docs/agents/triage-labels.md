@@ -1,22 +1,31 @@
-# Triage Labels
+# Triage labels
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the label strings in this project.
+Every open issue carries one readiness label. It says whether the issue can be started, and by whom.
 
-| Role (skills)      | Label in our tracker | Meaning                                  |
-| ------------------ | -------------------- | ---------------------------------------- |
-| `needs-triage`     | `needs-triage`       | A maintainer needs to evaluate this      |
-| `needs-info`       | `needs-info`         | Waiting on the reporter for information  |
-| `ready-for-agent`  | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
-| `ready-for-human`  | `ready-for-human`    | Needs a human to implement               |
-| `wontfix`          | `wontfix`            | Will not be actioned                     |
-| _(team-specific)_  | `idea`               | Unshaped idea: kept, not yet scoped      |
+| Label | Meaning | Next step |
+| --- | --- | --- |
+| `needs-triage` | New; nobody has looked at it yet | `/triage-pass` |
+| `needs-info` | Can't be judged or built yet; a comment says exactly what's missing | The reporter answers, then triage again |
+| `idea` | Worth keeping, not yet shaped | `/shape` when it's wanted |
+| `ready-for-agent` | Fully specified; an agent can finish it unattended | `/work-issue` |
+| `ready-for-human` | Specified, but needs judgement, access or skills an agent lacks | A developer picks it up |
+| `wontfix` | Won't be done; a comment says why | Close it |
 
-When a skill mentions a role, use the label from the right-hand column. Edit that column to match your vocabulary.
+## The ready-for-agent bar
+
+All of these are in the issue, and nothing is left to decide:
+
+- the outcome, and what's out of scope
+- acceptance criteria someone can check
+- where the change goes (repo, module, files if known)
+- how to verify it (tests to add or run, or exact manual steps)
+- no open product, design, security or data-ownership question
+
+If any is missing, it's `needs-info` (say what's missing) or `ready-for-human`.
 
 ## How issues move
 
-- **Ideas** (`idea`) may sit. Never build from one directly: shape it first (grill it, or `/to-spec`), write the outcome into the issue, then open ready tickets with `Part of #<idea>` and close or relabel the idea.
-- **New work** from the Bug and Task templates arrives as `needs-triage`. Triage swaps that for `ready-for-agent`, `ready-for-human`, `needs-info` (with a note saying exactly what's missing) or `wontfix`.
-- **ready-for-agent** means an agent can finish it without asking anything: acceptance criteria, the files or area, and how to verify are all in the issue.
-- **Type** labels (`bug`, `enhancement`, `security`) sit alongside; they say what an issue is, not how ready it is.
-- Bot-managed labels (dependency and security scanners) belong to their pipelines; don't triage those by hand.
+- New issues from the Bug and Task templates arrive as `needs-triage`.
+- Ideas are never built directly: `/shape` writes the spec, `/split-tickets` makes ready tickets that say `Part of #<idea>`, then the idea is closed.
+- **Type** labels (`bug`, `enhancement`, `security`, `dependencies`) sit alongside readiness and drive release-note sections.
+- Issues opened by scanners and bots keep the labels their pipelines manage; triage them only to set readiness.

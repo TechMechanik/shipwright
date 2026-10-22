@@ -14,7 +14,7 @@ Team's copy of this kit                         Each product repo
                                                                 existing labels, milestones and issues adopted
 ```
 
-Agents and skills never hard-code a platform. They call named **operations** (`claim`, `set-status`, `open-mr`, `watch-ci`, `close-milestone` …), and each repo's `docs/agents/issue-tracker.md` maps those names to `glab` or `gh` commands. Generic skills such as [mattpocock-skills](https://github.com/mattpocock/skills) (`/triage`, `/to-spec`, `/to-tickets`, `/wayfinder`) read the same file.
+Agents and skills never hard-code a platform. They call named **operations** (`claim`, `set-status`, `open-mr`, `watch-ci`, `close-milestone` …), and each repo's `docs/agents/issue-tracker.md` maps those names to `glab` or `gh` commands.
 
 ## What's in it
 
@@ -22,7 +22,10 @@ Agents and skills never hard-code a platform. They call named **operations** (`c
 | --- | --- |
 | `/onboard-team` | Six-round interview (platform, planning, secrets and packages, delivery, agents, conventions) → `config/team.yaml`; sets agent models |
 | `/onboard-repo` | Installs docs, profile, templates and rules into a repo, filling tokens from the team config; adopts the existing backlog (label mapping, milestones, status for open issues) through approved tables |
-| `/triage-pass` | Batch-triages `needs-triage`; a human approves the table before it's applied |
+| `/triage-pass` | Triages one issue or the `needs-triage` queue against the ready-for-agent bar; a human approves before it's applied |
+| `/shape` | Interviews the human one question at a time and writes a buildable spec into the issue |
+| `/split-tickets` | Splits a spec into vertical-slice tickets, one repo each, with blocking links, sizes and an epic |
+| `/domain-docs` | Keeps the glossary (`CONTEXT.md`) and decision records (`docs/adr/`) current |
 | `/plan-milestone` | New phases (with renumbering) and filling a phase with ordered, linked tickets |
 | `/tidy-board` | Drift check: missing milestone/status, stale in-progress, finished milestones |
 | `/work-issue` | One issue end to end: claim → plan → implement → verify → MR/PR → handoff |
@@ -37,7 +40,7 @@ Agents and skills never hard-code a platform. They call named **operations** (`c
 
 1. **Copy the kit** into a repo your team owns (fork or import), such as `tools/claude-team-process`.
 2. **Onboard the team**: in that repo, run `/onboard-team` and commit the resulting `plugin/config/team.yaml`.
-3. **Install** for each developer: `/plugin marketplace add <url of your copy>` and `/plugin install team-process@team-process`, plus `mattpocock-skills` from the official marketplace. Or commit this to each product repo's `.claude/settings.json` so trusting the repo prompts the install:
+3. **Install** for each developer: `/plugin marketplace add <url of your copy>` and `/plugin install team-process@team-process`. Or commit this to each product repo's `.claude/settings.json` so trusting the repo prompts the install:
 
    ```json
    {
@@ -48,7 +51,7 @@ Agents and skills never hard-code a platform. They call named **operations** (`c
    }
    ```
 4. **Onboard repos**: run `/onboard-repo` in each. Existing repos are the normal case: it never overwrites files or deletes labels, maps what's there, and opens one MR plus follow-up issues for bigger conversions (Liquibase adoption, unzipping webMethods packages, deploy runbooks).
-5. **Run the loop**: `/triage-pass`, `/plan-milestone`, `/work-issue`, `/tidy-board`, `/close-milestone`.
+5. **Run the loop**: `/triage-pass` → `/shape` → `/split-tickets` → `/plan-milestone` → `/work-issue` → `/tidy-board` → `/close-milestone`.
 
 Prerequisites: `glab` or `gh` logged in to your instance, and package managers pointed at your registry in user-level config, so agents never handle registry tokens.
 

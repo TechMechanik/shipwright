@@ -4,7 +4,7 @@ Issues, merge requests, the board and milestones live on GitLab ({{platform.url}
 
 ## Operations
 
-Agents and skills ask for these by name. Each is the one way to do that thing in this repo.
+The kit's agents and skills ask for these by name. Each is the one way to do that thing in this repo.
 
 | Operation | Command |
 |---|---|
@@ -33,17 +33,9 @@ Agents and skills ask for these by name. Each is the one way to do that thing in
 
 (Per-repo scope: replace `groups/{{owner_enc}}` with `projects/:id`.)
 
-## Merge requests as a triage surface
+## Outside contributions
 
-**MRs as a request surface: {{tracker.mrs_as_requests}}.** When yes, outside contributors' MRs run through the same labels and states as issues (`glab mr view|diff|note|update|close`). Issues and MRs are numbered separately: `#42` is an issue, `!42` an MR.
-
-## When a skill says "publish to the issue tracker" / "fetch the relevant ticket"
-
-`create-issue` / `read-issue`.
-
-## Wayfinding operations
-
-Used by `/wayfinder`. The **map** is one issue labelled `wayfinder:map`; **child** tickets carry `Part of #<map>` and `wayfinder:<research|prototype|grilling|task>`. Blocking uses `block`. The frontier is the map's open children with no open blockers and no assignee, in map order. Claim with `claim`; resolve with `comment`, `close-issue`, and a gist + link in the map's Decisions-so-far.
+**Outside MRs are triaged as requests: {{tracker.mrs_as_requests}}.** When yes, `/triage-pass` includes them: outside contributors' MRs run through the same labels and states as issues (`glab mr view|diff|note|update|close`). Issues and MRs are numbered separately: `#42` is an issue, `!42` an MR.
 
 ## Planning board and phases
 

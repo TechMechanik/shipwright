@@ -4,7 +4,7 @@ Issues, pull requests, the project board and milestones live on GitHub (`{{platf
 
 ## Operations
 
-Agents and skills ask for these by name. Each is the one way to do that thing in this repo.
+The kit's agents and skills ask for these by name. Each is the one way to do that thing in this repo.
 
 | Operation | Command |
 |---|---|
@@ -31,19 +31,11 @@ Agents and skills ask for these by name. Each is the one way to do that thing in
 | close-milestone | `gh api -X PATCH repos/{owner}/{repo}/milestones/<number> -f state=closed` |
 | release | Draft: `gh release create vX.Y.Z --draft --target main --generate-notes`. Publishing (`--draft=false`) is human only |
 
-"MR" in the skills means pull request here.
+"MR" in this kit means pull request here.
 
-## Pull requests as a triage surface
+## Outside contributions
 
-**PRs as a request surface: {{tracker.mrs_as_requests}}.** When yes, keep only PRs whose `authorAssociation` is `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR` or `NONE`, and run them through the same labels and states. Issues and PRs share one number space: resolve `#42` with `gh pr view 42`, falling back to `gh issue view 42`.
-
-## When a skill says "publish to the issue tracker" / "fetch the relevant ticket"
-
-`create-issue` / `read-issue`.
-
-## Wayfinding operations
-
-Used by `/wayfinder`. The **map** is one issue labelled `wayfinder:map`; **child** tickets are its sub-issues (`link-epic`) labelled `wayfinder:<research|prototype|grilling|task>`. Blocking uses `block`. The frontier is the map's open children with no open blockers and no assignee, in map order. Claim with `claim`; resolve with `comment`, `close-issue`, and a gist + link in the map's Decisions-so-far.
+**Outside PRs are triaged as requests: {{tracker.mrs_as_requests}}.** When yes, `/triage-pass` includes them: keep only PRs whose `authorAssociation` is `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR` or `NONE`, and run them through the same labels and states. Issues and PRs share one number space: resolve `#42` with `gh pr view 42`, falling back to `gh issue view 42`.
 
 ## Planning board and phases
 
